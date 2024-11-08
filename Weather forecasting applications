@@ -1,0 +1,65 @@
+import requests
+from datetime import datetime
+
+# Replace 'YOUR_API_KEY' with your actual OpenWeatherMap API key
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "http://api.openweathermap.org/data/2.5/"
+
+# Fetch current weather information
+def get_current_weather(city):
+    url = f"{BASE_URL}weather?q={city}&appid={API_KEY}&units=metric"
+    response = requests.get(url)
+    data = response.json()
+
+    if data["cod"] != "404":
+        main = data["main"]
+        wind = data["wind"]
+        weather = data["weather"][0]
+        
+        # Display the current weather data
+        print(f"\nCurrent Weather in {city.capitalize()}:")
+        print(f"Temperature: {main['temp']}°C")
+        print(f"Feels Like: {main['feels_like']}°C")
+        print(f"Humidity: {main['humidity']}%")
+        print(f"Pressure: {main['pressure']} hPa")
+        print(f"Weather: {weather['description'].capitalize()}")
+        print(f"Wind Speed: {wind['speed']} m/s\n")
+    else:
+        print("City not found. Please check the spelling or try a different city.\n")
+
+# Fetch 5-day weather forecast
+def get_weather_forecast(city):
+    url = f"{BASE_URL}forecast?q={city}&appid={API_KEY}&units=metric"
+    response = requests.get(url)
+    data = response.json()
+
+    if data["cod"] != "404":
+        print(f"5-Day Weather Forecast for {city.capitalize()}:")
+        for forecast in data["list"]:
+            timestamp = forecast["dt"]
+            date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M')
+            temp = forecast["main"]["temp"]
+            description = forecast["weather"][0]["description"]
+            wind_speed = forecast["wind"]["speed"]
+
+            # Display forecast data with timestamps
+            print(f"{date} | Temp: {temp}°C | Weather: {description.capitalize()} | Wind Speed: {wind_speed} m/s")
+    else:
+        print("City not found. Please check the spelling or try a different city.\n")
+
+# Main function
+def main():
+    while True:
+        city = input("Enter city name (or type 'exit' to quit): ").strip()
+        
+        if city.lower() == 'exit':
+            print("Exiting the weather app. Goodbye!")
+            break
+        
+        # Fetch and display current weather and forecast
+        get_current_weather(city)
+        get_weather_forecast(city)
+
+# Run the app
+if __name__ == "__main__":
+    main()
